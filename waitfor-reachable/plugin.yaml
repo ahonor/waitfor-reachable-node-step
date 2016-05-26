@@ -1,0 +1,33 @@
+name: Wait for reachable Node Step
+rundeckPluginVersion: 1.1
+author: (C) Alex Honor
+date: 05/26/2016
+version: 1.0
+providers:
+    - name: waitfor-reachable-step
+      service: WorkflowNodeStep
+      title: waitfor reachable
+      description: Wait for the step to be reachable
+      plugin-type: script
+      script-interpreter: /bin/bash
+      script-file: exec.sh
+      script-args: ${node.hostname}
+      config:
+        - name: command
+          title: Command
+          type: Select
+          required: true
+          description: the command to execute to determine reachability.
+          values: 'ping -q -c 1 ${node.hostname}, nc -z ${node.hostname} 22'
+        - name: interval
+          title: interval
+          type: Integer
+          required: true
+          description: the interval in seconds
+          default: 30
+        - name: maxtry
+          title: max try
+          type: Integer
+          required: true
+          default: 25
+          description: the maximum number of tries
