@@ -7,7 +7,7 @@ providers:
     - name: waitfor-reachable-step
       service: WorkflowNodeStep
       title: waitfor reachable
-      description: Wait for the step to be reachable
+      description: Wait for the Node to be reachable
       plugin-type: script
       script-interpreter: /bin/bash
       script-file: exec.sh
@@ -18,7 +18,9 @@ providers:
           type: Select
           required: true
           description: the command to execute to determine reachability.
-          values: 'ping -q -c 1 ${node.hostname}, nc -z ${node.hostname} 22'
+          values: 
+            - 'ping -W1 -c1 ${node.hostname}'
+            - 'nc -z -w1 -G1 ${node.hostname} 22'
         - name: interval
           title: interval
           type: Integer
@@ -31,3 +33,28 @@ providers:
           required: true
           default: 25
           description: the maximum number of tries
+        - name: help
+          title: ' '
+          type: String
+          default: |-
+            This step will run the specified command until it succeeds,
+            waiting interval seconds before trying again, up to maximum tries.
+            The `${node.hostname}` context variable will be set from the node context.
+
+            Commands:
+
+            * `ping -W1 -c1 ${node.hostname}`: Ping the host once and timeout after 1 second, if no response.
+            * `nc -z -w1 -G1 ${node.hostname} 22`: Connect to the SSH port and wait up to one second for a response.
+
+            Caveats for the plugin developer:
+
+            * If you add additional commands to the Select list, be sure they implicitly timeout or this step can hang the job.
+            * Make sure the command to test reachability is not destructive or have negative side effects.
+
+            If you want to learn more about writing a script based plugin
+            see the [Script Plugin Development](http://rundeck.org/docs/developer/plugin-development.html#script-plugin-development) page.
+          renderingOptions:
+            displayType: STATIC_TEXT
+            staticTextContentType: text/x-markdown
+            grouping: secondary
+            groupName: Help
